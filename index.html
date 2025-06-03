@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Présentation Mémoire : Résumer le Journal Officiel</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/12764/12764240.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            background: linear-gradient(145deg, #000000 0%, #111111 100%);
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            width: 98%;
+            max-width: 1400px;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-sizing: border-box;
+            padding-bottom: 90px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .slide {
+            width: 100%;
+            height: calc(100% - 100px);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            box-sizing: border-box;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 1rem 2rem;
+            transform: translateX(100px);
+        }
+        
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide-content {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            color: #FFFFFF;
+            box-sizing: border-box;
+            text-align: left;
+            padding: 1.5rem 2rem;
+        }
+        
+        .slide-content::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .slide-content.centered {
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide-content h1, .slide-content h2, .slide-content h3 {
+            color: #A259FF;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            margin-top: 0;
+            line-height: 1.2;
+            text-shadow: 0 0 20px rgba(162, 89, 255, 0.3);
+        }
+        
+        .slide-content.centered h1, .slide-content.centered h2, .slide-content.centered h3 {
+            align-self: center;
+            text-align: center;
+        }
+
+        .slide-content h1 { font-size: 2.8rem; margin-bottom: 1rem; }
+        .slide-content h2 { font-size: 2.2rem; margin-bottom: 1rem; }
+        .slide-content h3 { font-size: 1.6rem; margin-bottom: 0.8rem; }
+        
+        .slide-content p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-weight: 300;
+            margin-bottom: 0.8rem;
+        }
+        
+        .slide-content ul {
+            list-style: none;
+            margin-left: 0;
+            padding-left: 0;
+            color: #FFFFFF;
+            width: 100%;
+        }
+        
+        .slide-content li {
+            margin-bottom: 0.6rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-weight: 300;
+            padding-left: 2rem;
+            position: relative;
+        }
+        
+        .slide-content li::before {
+            content: '▶';
+            color: #A259FF;
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .slide-content strong {
+            color: #C77DFF;
+            font-weight: 600;
+        }
+
+        /* Layout amélioré pour text-image slides */
+        .content-layout {
+            flex-direction: row;
+            gap: 2rem;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .content-layout > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+            padding: 1rem 0;
+        }
+        
+        .content-layout .text-column {
+            padding-right: 1rem;
+        }
+        
+        .content-layout .image-column {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-left: 1rem;
+        }
+        
+        .content-layout img {
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 35px rgba(162, 89, 255, 0.3);
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            border: 2px solid rgba(162, 89, 255, 0.3);
+        }
+
+        /* Section slides */
+        .section-slide .slide-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .section-slide h2 {
+            font-size: 4rem;
+        }
+
+        /* Quote slides */
+        .quote-slide .slide-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .quote-slide p {
+            font-size: 2.2rem;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #FFFFFF;
+            margin-bottom: 1.5rem;
+        }
+        
+        .quote-slide span {
+            font-size: 1.4rem;
+            color: #A259FF;
+            margin-top: 1rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        /* Navigation améliorée */
+        .navigation-buttons {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            z-index: 10;
+        }
+        
+        .nav-button {
+            background: linear-gradient(145deg, #A259FF, #9B5DE5);
+            color: #000000;
+            padding: 1rem 2.5rem;
+            border-radius: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px rgba(162, 89, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 1rem;
+            border: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background: linear-gradient(145deg, #C77DFF, #A259FF);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(162, 89, 255, 0.4);
+        }
+        
+        .nav-button:disabled {
+            background: linear-gradient(145deg, #333333, #222222);
+            color: #666666;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: translateY(0);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 2rem;
+            right: 3rem;
+            font-size: 1.1rem;
+            color: #A259FF;
+            font-weight: 600;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+            background: rgba(162, 89, 255, 0.05);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            border: 1px solid rgba(162, 89, 255, 0.2);
+        }
+        
+        canvas {
+            background-color: transparent !important;
+        }
+
+        /* Tables améliorées */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(145deg, #111111, #222222);
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid rgba(162, 89, 255, 0.2);
+            padding: 0.8rem 1rem;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background: linear-gradient(145deg, #A259FF, #9B5DE5);
+            color: #000000;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table td {
+            background: rgba(26, 26, 26, 0.8);
+        }
+        
+        .data-table tr:nth-child(even) td {
+            background: rgba(42, 42, 42, 0.8);
+        }
+        
+        .data-table td strong {
+            color: #00ff88;
+        }
+        
+        .data-table td .text-red-400 {
+            color: #ff6b6b;
+        }
+
+        /* Profils */
+        .profile-container {
+            display: flex;
+            gap: 3rem;
+            margin-top: 3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .profile-card {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-basis: 250px;
+            border: 1px solid rgba(162, 89, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .profile-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            border: 4px solid #A259FF;
+            box-shadow: 0 0 0 8px rgba(162, 89, 255, 0.2);
+        }
+        
+        .profile-card p {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .profile-card span {
+            font-size: 1rem;
+            color: #A259FF;
+            margin-top: 0.5rem;
+        }
+
+        /* Highlight boxes */
+        .highlight-box {
+            background: rgba(162, 89, 255, 0.15);
+            border: 2px solid #A259FF;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 0 20px rgba(162, 89, 255, 0.2);
+        }
+
+        .highlight-box p {
+            color: #FFFFFF;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .presentation-container {
+                padding-bottom: 80px;
+            }
+            .slide {
+                padding: 0 2rem;
+                height: calc(100% - 90px);
+            }
+            .slide-content {
+                padding: 2rem 0;
+            }
+            .slide-content h1 { font-size: 2.5rem; }
+            .slide-content h2 { font-size: 2rem; }
+            .slide-content h3 { font-size: 1.5rem; }
+            .content-layout {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .content-layout > div {
+                width: 100%;
+                padding: 0;
+                align-items: center;
+                text-align: center;
+            }
+            .content-layout .image-column, .content-layout .text-column {
+                padding: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .presentation-container {
+                height: 98vh;
+                width: 99%;
+                border-radius: 1rem;
+                padding-bottom: 70px;
+            }
+            .slide {
+                padding: 0 1rem;
+                height: calc(100% - 70px);
+            }
+            .slide-content {
+                padding: 1.5rem 0;
+            }
+            .slide-content h1 { font-size: 2rem; }
+            .slide-content h2 { font-size: 1.6rem; }
+            .slide-content h3 { font-size: 1.3rem; }
+            .slide-content p, .slide-content li { font-size: 1rem; }
+            .navigation-buttons {
+                bottom: 1rem;
+                gap: 1rem;
+            }
+            .nav-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            .slide-number {
+                top: 1rem;
+                right: 1rem;
+                font-size: 0.9rem;
+            }
+            .chart-container { 
+                height: 300px; 
+                padding: 1rem;
+            }
+            .data-table { font-size: 0.9rem; }
+            .data-table th, .data-table td { padding: 0.8rem; }
+            .profile-container {
+                gap: 1.5rem;
+                flex-direction: column;
+                align-items: center;
+            }
+            .profile-card {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Titre -->
+        <div id="slide-1" class="slide active">
+            <div class="slide-content centered">
+                <h1>Automatisation du Résumé du Journal Officiel par Modèles de Langage Légers</h1>
+                <p style="font-size: 1.8rem; font-weight: 400; margin: 2rem 0;">
+                    Approches : <strong>Prompt Engineering</strong> et <strong>Fine-Tuning</strong>
+                </p>
+                <div style="margin: 3rem 0;">
+                    <img src="https://media.licdn.com/dms/image/v2/C560BAQEHtv7LpRJ37A/company-logo_100_100/company-logo_100_100/0/1642964011772?e=1754524800&v=beta&t=8gm2VL3XKSIeLOVf9wKTNsYaM0Z3aawKZOcTXkDberQ" alt="Logo Sorbonne" style="border-radius: 50%; box-shadow: 0 0 30px rgba(162, 89, 255, 0.5);">
+                </div>
+                <div style="color: #b0b0b0; font-size: 1.4rem; line-height: 1.8;">
+                    <p style="font-weight: 700; color: #A259FF;">Joris Salmon</p>
+                    <p style="font-weight: 700; color: #A259FF;">Nolwenn Chapellon</p>
+                    <p>Année : 2024-2025 • Promotion Mars 2025</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Contexte & Problématique -->
+        <div id="slide-2" class="slide quote-slide">
+            <div class="slide-content centered">
+                <h2>Contexte & Problématique</h2>
+                <div style="margin: 2rem 0;">
+                    <img src="data:image/png;base64,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" alt="Journal Officiel" style="border-radius: 1.5rem;">
+                </div>
+                <div style="text-align: left; width: 100%; max-width: 800px;">
+                    <ul style="font-size: 1.3rem; line-height: 1.8;">
+                        <li>Journal Officiel : <strong>volume immense</strong>, langage <strong>juridique complexe</strong></li>
+                        <li>Défi d'accès à l'information pour les <strong>journalistes</strong></li>
+                        <li>LLM : puissants, mais <strong>coûteux et peu adaptables</strong></li>
+                        <li>SLM : <strong>économiques, agiles</strong>, et <strong>spécialisables</strong></li>
+                    </ul>
+                </div>
+                <div class="highlight-box">
+                    <p>
+                        Comment générer des résumés <strong>rigoureux, synthétiques et exploitables</strong> du Journal Officiel, avec des <strong>modèles de langage légers</strong> ?
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: État de l'Art - Prompt Engineering -->
+        <div id="slide-3" class="slide">
+            <div class="slide-content content-layout">
+                <div class="text-column">
+                    <h2>État de l'Art : Prompt Engineering</h2>
+                    <ul>
+                        <li>Optimisation des instructions pour guider le LLM</li>
+                        <li>Objectif : réponses pertinentes sans modification du modèle</li>
+                        <li>Techniques : <strong>Zero-Shot</strong> et <strong>Few-Shot</strong></li>
+                        <li>Approches avancées : <strong>Chain of Thought</strong> (CoT)</li>
+                        <li style="color: #ff6b6b;"><strong>Limite pour les SLM :</strong> Insuffisant sans adaptation profonde</li>
+                    </ul>
+                </div>
+                <div class="image-column">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCNrbw13RgbuXpS6DPMGDVIYcSfMUkuNUUig&s" alt="Prompt Engineering">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: État de l'Art - Fine-Tuning -->
+        <div id="slide-4" class="slide">
+            <div class="slide-content content-layout">
+                <div class="image-column">
+                    <img src="https://sdmntprwestus2.oaiusercontent.com/files/00000000-7cc8-61f8-8fec-17fc98d82a17/raw?se=2025-06-03T09%3A55%3A58Z&sp=r&sv=2024-08-04&sr=b&scid=7454dcee-14ea-5598-914e-d171bd3d9d96&skoid=71e8fa5c-90a9-4c17-827b-14c3005164d6&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-03T00%3A05%3A35Z&ske=2025-06-04T00%3A05%3A35Z&sks=b&skv=2024-08-04&sig=BNHGjf8pO6xrsBB2FBXUlD4wntzhyqDgDPOkjS6JIdg%3D" alt="Fine-Tuning">
+                </div>
+                <div class="text-column">
+                    <h2>État de l'Art : Fine-Tuning & Distillation</h2>
+                    <ul>
+                        <li><strong>Fine-Tuning</strong> : spécialisation sur un corpus spécifique</li>
+                        <li>Apporte précision, stabilité, adaptation au domaine</li>
+                        <li>Techniques légères (PEFT) : <strong>LoRA, QLoRA, DoRA, QDoRA</strong></li>
+                        <li><strong>Distillation</strong> : transfert grand modèle → petit modèle</li>
+                        <li>Combinaison performance et efficacité</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Méthodologie - Corpus & Modèles -->
+        <div id="slide-5" class="slide">
+            <div class="slide-content content-layout">
+                <div class="text-column">
+                    <h2>Méthodologie : Corpus & Modèles</h2>
+                    <p><strong>Corpus :</strong> articles du Journal Officiel (API Légifrance)</p>
+                    <ul>
+                        <li><strong>LLaMandement</strong> (~15 000 paires article/résumé)</li>
+                        <li><strong>Corpus distillé</strong> : résumés générés par GPT-3.5-turbo</li>
+                    </ul>
+                    <p style="margin-top: 2rem;"><strong>Modèles étudiants (SLM) :</strong></p>
+                    <ul>
+                        <li><strong>Mistral-7B-Instruct-v0.2</strong></li>
+                        <li><strong>Qwen2-1.5B-Instruct</strong></li>
+                        <li><strong>Phi-4-mini-instruct</strong></li>
+                    </ul>
+                </div>
+                <div class="image-column">
+                    <img src="https://sdmntprwestus2.oaiusercontent.com/files/00000000-480c-61f8-91c6-3cd68ba561f1/raw?se=2025-06-03T10%3A03%3A19Z&sp=r&sv=2024-08-04&sr=b&scid=5e5a10ba-58cf-5478-b2c0-22b01770369b&skoid=71e8fa5c-90a9-4c17-827b-14c3005164d6&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-03T00%3A11%3A56Z&ske=2025-06-04T00%3A11%3A56Z&sks=b&skv=2024-08-04&sig=GSnKODX9gj70U%2BAW7a2ZZfXRH3k7pNuoy/eRixEuYho%3D" alt="Corpus et Modèles">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Méthodologie - Protocoles -->
+        <div id="slide-6" class="slide">
+            <div class="slide-content content-layout">
+                <div class="image-column">
+                    <img src="https://sdmntprpolandcentral.oaiusercontent.com/files/00000000-afe8-620a-8bde-f7897abb7660/raw?se=2025-06-03T10%3A21%3A50Z&sp=r&sv=2024-08-04&sr=b&scid=e530e61b-9c52-528e-a0f7-6d22e09ee9ed&skoid=76024c37-11e2-4c92-aa07-7e519fbe2d0f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-03T06%3A35%3A04Z&ske=2025-06-04T06%3A35%3A04Z&sks=b&skv=2024-08-04&sig=CN6CdbGwkGRjbf2wV%2BkgprYQpuRJIxJY2tEj6wI22nQ%3D" alt="Protocole">
+                </div>
+                <div class="text-column">
+                    <h2>Méthodologie : Protocoles d'Expérimentation</h2>
+                    <p><strong>Comparaison de deux approches :</strong></p>
+                    <ul>
+                        <li><strong>Prompt Engineering seul</strong> (Zero-Shot, Few-Shot)</li>
+                        <li><strong>Fine-Tuning léger (PEFT)</strong> avec QLoRA et QDoRA</li>
+                    </ul>
+                    <p style="margin-top: 2rem;"><strong>Évaluation sur 20 extraits du JO :</strong></p>
+                    <ul>
+                        <li>Métriques automatiques : <strong>ROUGE, BERTScore, G-Eval</strong></li>
+                        <li>Évaluation humaine qualitative</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <p>Hyperparamètres FT : Batch 1, Acc. 64, LR 1e-4, 4-bit quant.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Résultats Phi-4 -->
+        <div id="slide-7" class="slide">
+            <div class="slide-content">
+                <h2 style="text-align: center;">Résultats : Phi-4-mini-instruct</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Métrique</th>
+                            <th>Précis (FT vs Base)</th>
+                            <th>Neutre (FT vs Base)</th>
+                            <th>Créatif (FT vs Base)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ROUGE-1 F1</strong></td>
+                            <td><strong>+16.17% ↑</strong></td>
+                            <td><span class="text-red-400">-10.10% ↓</span></td>
+                            <td><span class="text-red-400">-11.32% ↓</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>BERTScore F1</strong></td>
+                            <td><strong>+5.00% ↑</strong></td>
+                            <td><span class="text-red-400">-3.23% ↓</span></td>
+                            <td><span class="text-red-400">-1.78% ↓</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Note Qualitative</strong></td>
+                            <td><strong>3.5/10 → 7.5/10</strong></td>
+                            <td>Dégradé</td>
+                            <td>Dégradé</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="text-align: center; font-size: 1.3rem; margin-top: 2rem; font-weight: 500;">
+                    Fine-Tuning <strong>essentiel pour Phi-4</strong>, notamment pour le style 'Précis'.<br>
+                    Dégradation notable des autres styles sans fine-tuning.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Résultats Mistral -->
+        <div id="slide-8" class="slide">
+            <div class="slide-content">
+                <h2 style="text-align: center;">Résultats : Mistral-7B-Instruct-v0.2</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Métrique</th>
+                            <th>Précis (FT vs Base)</th>
+                            <th>Neutre (FT vs Base)</th>
+                            <th>Créatif (FT vs Base)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ROUGE-1 F1</strong></td>
+                            <td>+2.41% ↑</td>
+                            <td><span class="text-red-400">-3.98% ↓</span></td>
+                            <td>+0.71% ↑</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BERTScore F1</strong></td>
+                            <td>+0.27% ↑</td>
+                            <td><span class="text-red-400">-1.72% ↓</span></td>
+                            <td>+0.16% ↑</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Note Qualitative</strong></td>
+                            <td><strong>8/10 → 7.5/10</strong></td>
+                            <td>Dégradé</td>
+                            <td>Amélioration vs GPT-4</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="text-align: center; font-size: 1.3rem; margin-top: 2rem; font-weight: 500;">
+                    Mistral : <strong>très performant de base</strong> pour le résumé juridique.<br>
+                    Fine-Tuning : valeur ajoutée limitée, améliore le style 'Créatif'.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Résultats Qwen -->
+        <div id="slide-9" class="slide">
+            <div class="slide-content">
+                <h2 style="text-align: center;">Résultats : Qwen2-1.5B-Instruct</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Métrique</th>
+                            <th>Précis (FT vs Base)</th>
+                            <th>Neutre (FT vs Base)</th>
+                            <th>Créatif (FT vs Base)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ROUGE-1 F1</strong></td>
+                            <td><span class="text-red-400">-11.38% ↓</span></td>
+                            <td><span class="text-red-400">-19.91% ↓</span></td>
+                            <td><strong>+13.56% ↑</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>BERTScore F1</strong></td>
+                            <td><span class="text-red-400">-1.89% ↓</span></td>
+                            <td><span class="text-red-400">-9.88% ↓</span></td>
+                            <td>+1.79% ↑</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Note Qualitative</strong></td>
+                            <td>Dégradé</td>
+                            <td>Dégradé</td>
+                            <td><strong>5/10 → 6/10</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="text-align: center; font-size: 1.3rem; margin-top: 2rem; font-weight: 500;">
+                    Pour Qwen, le Fine-Tuning est <strong>nécessaire</strong>.<br>
+                    Amélioration modeste, bénéficie principalement au style 'Créatif'.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Synthèse des Performances -->
+        <div id="slide-10" class="slide">
+            <div class="slide-content">
+                <h2 style="text-align: center;">Synthèse des Performances Clés (KPI)</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Modèle</th>
+                            <th>Style</th>
+                            <th>ROUGE-1 Gain (%)</th>
+                            <th>BERTScore Gain (%)</th>
+                            <th>Note Quali. (Base → FT)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Phi-4-mini</strong></td>
+                            <td>Précis</td>
+                            <td><strong>+16.17</strong></td>
+                            <td><strong>+5.00</strong></td>
+                            <td>3.5/10 → <strong>7.5/10</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Mistral-7B</td>
+                            <td>Précis</td>
+                            <td>+2.41</td>
+                            <td>+0.27</td>
+                            <td><strong>8/10</strong> → 7.5/10</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen2-1.5B</td>
+                            <td>Créatif</td>
+                            <td>+13.56</td>
+                            <td>+1.79</td>
+                            <td>5/10 → <strong>6/10</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <p style="text-align: center; font-size: 1.3rem; margin-top: 2rem; font-weight: 500;">
+                    Le graphique et le tableau montrent l'impact variable du Fine-Tuning.<br>
+                    Gains significatifs pour <strong>Phi-4</strong> et <strong>Qwen</strong> sur leurs styles optimaux.<br>
+                    <strong>Mistral</strong> conserve son excellence intrinsèque.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 11: Analyse Qualitative -->
+        <div id="slide-11" class="slide">
+            <div class="slide-content">
+                <h2>Analyse Qualitative : Points Clés</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                    <div>
+                        <h3>Forces observées</h3>
+                        <ul>
+                            <li>Résumés <strong>factuellement corrects</strong></li>
+                            <li>Respect de la <strong>structure juridique</strong></li>
+                            <li>Adaptation au <strong>style demandé</strong></li>
+                            <li>Longueur appropriée (100-150 mots)</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>Faiblesses identifiées</h3>
+                        <ul>
+                            <li>Parfois <strong>trop générique</strong></li>
+                            <li>Manque de <strong>hiérarchisation</strong> des informations</li>
+                            <li>Répétitions dans certains cas</li>
+                            <li>Nuances juridiques parfois perdues</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 1.5rem;">
+                    <p>
+                        <strong>Observation majeure :</strong> Le Fine-Tuning améliore significativement la cohérence et la précision, 
+                        mais l'efficacité varie selon l'architecture du modèle et le corpus d'entraînement.
+                    </p>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <h3>Recommandations d'usage</h3>
+                    <ul>
+                        <li><strong>Mistral-7B</strong> : Prêt à l'emploi pour usage professionnel</li>
+                        <li><strong>Phi-4-mini</strong> : Nécessite Fine-Tuning, excellent potentiel</li>
+                        <li><strong>Qwen2-1.5B</strong> : Idéal pour prototypage rapide avec Fine-Tuning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Limites de l'Étude -->
+        <div id="slide-12" class="slide">
+            <div class="slide-content content-layout">
+                <div class="text-column">
+                    <h2>Limites de l'Étude</h2>
+                    <ul>
+                        <li>Ressources GPU limitées (contraintes sur modèles et itérations)</li>
+                        <li>Références générées par l'IA (GPT-4) : peuvent introduire des biais</li>
+                        <li>Volume de données d'entraînement modeste (limite la généralisation)</li>
+                        <li>Métriques automatiques : ne capturent pas toutes les nuances</li>
+                        <li>Nécessité de l'évaluation humaine complémentaire</li>
+                        <li>Test limité à un domaine juridique spécifique</li>
+                        <li>Variabilité des performances selon les types d'articles</li>
+                    </ul>
+                </div>
+                <div class="image-column">
+                    <img src="https://placehold.co/400x300/1a1a1a/A259FF?text=LIMITES%0ARECHERCHE" alt="Limites de la recherche">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Perspectives d'Amélioration -->
+        <div id="slide-13" class="slide">
+            <div class="slide-content">
+                <h2>Perspectives d'Amélioration</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                    <div>
+                        <h3>Court terme</h3>
+                        <ul>
+                            <li>Augmenter le <strong>corpus d'entraînement</strong></li>
+                            <li>Diversifier les <strong>types d'articles juridiques</strong></li>
+                            <li>Optimiser les <strong>hyperparamètres</strong></li>
+                            <li>Tester d'autres techniques PEFT (AdaLoRA, etc.)</li>
+                            <li>Évaluation humaine plus extensive</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>Moyen terme</h3>
+                        <ul>
+                            <li>Explorer d'autres <strong>architectures SLM</strong></li>
+                            <li>Techniques de <strong>distillation avancées</strong></li>
+                            <li>Multi-tâches (résumé + classification)</li>
+                            <li>Adaptation à d'autres domaines juridiques</li>
+                            <li>Interface utilisateur professionnelle</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 1.5rem;">
+                    <p>
+                        <strong>Vision long terme :</strong> Développement d'un assistant IA spécialisé dans l'analyse 
+                        et la synthèse de documents juridiques, accessible aux professionnels du droit et du journalisme.
+                    </p>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <h3>Applications potentielles</h3>
+                    <ul>
+                        <li>Veille réglementaire automatisée</li>
+                        <li>Assistance à la rédaction journalistique</li>
+                        <li>Outil d'aide à la décision juridique</li>
+                        <li>Formation et éducation juridique</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Conclusion -->
+        <div id="slide-14" class="slide">
+            <div class="slide-content centered">
+                <h2>Conclusion & Enseignements</h2>
+                
+                <div class="highlight-box" style="margin: 2rem 0;">
+                    <p style="font-size: 1.8rem; text-align: center;">
+                        Oui, les SLM peuvent résumer le Journal Officiel de manière <strong>rigoureuse et utile</strong> !
+                    </p>
+                </div>
+
+                <div style="text-align: left; max-width: 900px; margin: 0 auto;">
+                    <h3>Enseignements clés</h3>
+                    <ul style="font-size: 1.1rem;">
+                        <li><strong>Fine-Tuning (PEFT)</strong> essentiel pour la spécialisation des SLM</li>
+                        <li>Efficacité varie selon le <strong>modèle</strong> et le <strong>style de génération</strong></li>
+                        <li><strong>Évaluation humaine</strong> indispensable pour valider la qualité</li>
+                        <li>Mistral-7B montre une <strong>excellence intrinsèque</strong> remarquable</li>
+                        <li>Phi-4 et Qwen bénéficient grandement du Fine-Tuning</li>
+                    </ul>
+
+                    <h3 style="margin-top: 1rem;">Impact recherche</h3>
+                    <ul style="font-size: 1.1rem;">
+                        <li>Démonstration de la <strong>viabilité</strong> des SLM pour tâches spécialisées</li>
+                        <li>Méthodologie <strong>reproductible</strong> pour d'autres domaines</li>
+                        <li>Contribution à l'<strong>accessibilité</strong> de l'information juridique</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Questions -->
+        <div id="slide-15" class="slide">
+            <div class="slide-content centered">
+                <h1>Questions ?</h1>
+                <p style="font-size: 2rem; font-weight: 300; margin: 2rem 0; color: #b0b0b0;">
+                    Merci de votre attention !
+                </p>
+                
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQG0Ts5x3JvXXg/profile-displayphoto-shrink_100_100/B4DZVhxx5JHkAU-/0/1741102194696?e=1754524800&v=beta&t=KrDTkMrZfCk8yWtGHZd-mt8etDOj2Uk16cEQV3-skSo" alt="Photo de profil de Joris Salmon">
+                        <p>Joris Salmon</p>
+                        <span>Étudiant Master 2 Data Analytics</span>
+                    </div>
+                    <div class="profile-card">
+                        <img src="https://media.licdn.com/dms/image/v2/D4E03AQE3O2u_y_-8Lw/profile-displayphoto-shrink_800_800/B4EZQofBuMHAAg-/0/1735846012272?e=1754524800&v=beta&t=OdXLnWjNCoKHh0Dr7g0nhCEiS-zTc39Bve_ufJHqh1g" alt="Photo de profil de Nolwenn Chapellon">
+                        <p>Nolwenn Chapellon</p>
+                        <span>Étudiante Master 2 Data Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-number">Slide <span id="current-slide-num">1</span> / <span id="total-slides">15</span></div>
+        <div class="navigation-buttons">
+            <button id="prevBtn" class="nav-button">Précédent</button>
+            <button id="nextBtn" class="nav-button">Suivant</button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentSlideNumSpan = document.getElementById('current-slide-num');
+        const totalSlidesSpan = document.getElementById('total-slides');
+        let currentSlideIndex = 0;
+        let performanceChart = null;
+
+        // Update total slide count on load
+        totalSlidesSpan.textContent = slides.length;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            currentSlideNumSpan.textContent = index + 1;
+            updateNavigationButtons();
+
+            // Check if current slide contains the chart (slide 10 = index 9)
+            if (index === 9) { 
+                setTimeout(() => renderChart('performanceChart'), 300);
+            } else {
+                // Destroy the chart if moving away from the chart slide
+                if (performanceChart) {
+                    performanceChart.destroy();
+                    performanceChart = null;
+                }
+            }
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === slides.length - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlideIndex < slides.length - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        });
+
+        // Keyboard navigation (left/right arrows, space, enter)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            } else if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextBtn.click();
+            } else if (e.key === 'Home') {
+                currentSlideIndex = 0;
+                showSlide(currentSlideIndex);
+            } else if (e.key === 'End') {
+                currentSlideIndex = slides.length - 1;
+                showSlide(currentSlideIndex);
+            }
+        });
+
+        // Chart.js setup for performance visualization
+        function renderChart(canvasId) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            // Destroy existing chart if any
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+
+            // Create gradient for bars
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(162, 89, 255, 0.9)');
+            gradient.addColorStop(0.5, 'rgba(155, 93, 229, 0.7)');
+            gradient.addColorStop(1, 'rgba(199, 125, 255, 0.5)');
+
+            performanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Phi-4 (Précis)', 'Mistral (Précis)', 'Qwen (Créatif)'],
+                    datasets: [{
+                        label: 'Gain ROUGE-1 F1 (%)',
+                        data: [16.17, 2.41, 13.56],
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(162, 89, 255, 0.8)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#FFFFFF',
+                                font: {
+                                    size: 14,
+                                    weight: '600',
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            titleColor: '#A259FF',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#A259FF',
+                            borderWidth: 1,
+                            cornerRadius: 10,
+                            padding: 12,
+                            titleFont: { size: 16, weight: 'bold', family: 'Inter' },
+                            bodyFont: { size: 14, family: 'Inter' },
+                            callbacks: {
+                                label: function(context) {
+                                    return `Gain: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#FFFFFF',
+                                font: {
+                                    size: 12,
+                                    weight: '500',
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 20,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                lineWidth: 1
+                            },
+                            ticks: {
+                                color: '#FFFFFF',
+                                font: {
+                                    size: 12,
+                                    weight: '500',
+                                    family: 'Inter'
+                                },
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize presentation
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>
